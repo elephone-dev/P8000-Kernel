@@ -33,7 +33,7 @@ typedef enum {
 #define MD_LTG_FLAG (MD_LTE_FLAG|MD_TDD_FLAG|MD_2G_FLAG)
 
 #define CCCI_SMEM_DUMP_SIZE      4096// smem size we dump when EE
-#define CCCI_SMEM_SIZE_EXCEPTION 0x200000//exception smem total size 
+#define CCCI_SMEM_SIZE_EXCEPTION 0x10000/* exception smem total size */
 #define CCCI_SMEM_OFFSET_EXREC 2048// where the exception record begain in smem
 #define CCCC_SMEM_CCIF_SRAM_SIZE 16
 #define CCCI_SMEM_OFFSET_CCIF_SRAM (CCCI_SMEM_OFFSET_EXREC+1024-CCCC_SMEM_CCIF_SRAM_SIZE)
@@ -43,6 +43,8 @@ typedef enum {
 #define CCCI_SMEM_CCCI_DEBUG_SIZE 2048 // MD CCCI debug info size
 #define CCCI_SMEM_OFFSET_MDSS_DEBUG 2048 // where the MD SS debug info begain in smem
 #define CCCI_SMEM_MDSS_DEBUG_SIZE 2048 // MD SS debug info size
+#define CCCI_SMEM_SLEEP_MODE_DBG_SIZE 1024 /* MD sleep mode debug info section in smem tail */
+#define CCCI_SMEM_SLEEP_MODE_DBG_DUMP 512 /* only dump first 512bytes in sleep mode info */
 
 // MD type defination
 typedef enum {
@@ -414,6 +416,7 @@ enum {
 	ID_GET_MD_STATE = 12,		// for DVFS
 	ID_THROTTLING_CFG = 13,		// For MD SW throughput throttling
 	ID_RESET_MD = 14,			// for SVLTE MD3 reset MD1
+	ID_DUMP_MD_SLEEP_MODE = 16,
 
 	ID_UPDATE_TX_POWER = 100,   // for SWTP
 
@@ -675,4 +678,6 @@ unsigned int get_sim_switch_type(void);
 // CLib for modem get ap time
 void notify_time_update(void);
 int wait_time_update_notify(void);
+/*cb API for system power off*/
+void ccci_power_off(void);
 #endif

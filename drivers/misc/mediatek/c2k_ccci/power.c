@@ -982,9 +982,9 @@ static long misc_modem_ioctl(struct file *file, unsigned int
 
 	case CMDM_IOCTL_ENTER_FLIGHT_MODE:
 		printk("[C2K SDIO]enter flight mode.\n");
-        if(!GPIO_C2K_VALID(GPIO_C2K_MDM_PWR_IND))
-        modem_notify_event(MDM_EVT_NOTIFY_POWER_OFF);
 		c2k_power_off_modem();
+		if(!GPIO_C2K_VALID(GPIO_C2K_MDM_PWR_IND))
+			modem_notify_event(MDM_EVT_NOTIFY_POWER_OFF);
 		asc_rx_reset(SDIO_RX_HD_NAME); // to let AP release Rx wakelock
 		break;
 	case CMDM_IOCTL_LEAVE_FLIGHT_MODE:

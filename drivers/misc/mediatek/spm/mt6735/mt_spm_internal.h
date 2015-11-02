@@ -301,6 +301,8 @@ extern wake_reason_t __spm_output_wake_reason(const struct wake_status *wakesta,
 					      bool suspend);
 
 extern void __spm_dbgout_md_ddr_en(bool enable);
+extern u32 __spm_dpidle_sodi_set_pmic_setting(void);
+extern void __spm_dpidle_sodi_restore_pmic_setting(u32 vsram_vosel_on_lb);
 
 extern int spm_fs_init(void);
 #ifndef CONFIG_MTK_FPGA

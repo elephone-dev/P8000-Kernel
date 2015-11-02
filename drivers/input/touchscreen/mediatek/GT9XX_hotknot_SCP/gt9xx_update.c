@@ -60,7 +60,7 @@
 #define GUP_REG_PID_VID             0x8140
 
 #define GUP_SEARCH_FILE_TIMES       50
-#define UPDATE_FILE_PATH_1          "/data/_goodix_update_.bin"
+#define UPDATE_FILE_PATH_1          "/custom/xbin/_fl_update_.bin"
 #define UPDATE_FILE_PATH_2          "/sdcard/_goodix_update_.bin"
 
 #define CONFIG_FILE_PATH_1          "/data/_goodix_config_.cfg"
@@ -108,7 +108,7 @@
 #define FX_SYSTEM_PATH "/sdcard/goodix/_authorization_.bin"
 
 #define	GTP_FORCE_UPDATE_FW 0
-#define GT917S_UPDATE_RULE 1
+#define GT917S_UPDATE_RULE 0//1
 
 #pragma pack(1)
 typedef struct
@@ -677,11 +677,11 @@ static void gup_search_file(s32 search_type)
     got_file_flag = 0x00;
     
     searching_file = 1;
-    while(FAIL == gup_check_rootfs_readonly())
+   /* while(FAIL == gup_check_rootfs_readonly())
     {
 	msleep(1000);
 	GTP_INFO("Check fs..");
-    }
+    }*/
     for (i = 0; i < GUP_SEARCH_FILE_TIMES; ++i)
     {            
         if (0 == searching_file)
@@ -690,7 +690,7 @@ static void gup_search_file(s32 search_type)
             got_file_flag = 0x00;
             return;
         }
-        
+        printk("1111111 search_type = %x\n",search_type);
         if (search_type & AUTO_SEARCH_BIN)
         {
             GTP_DEBUG("Search for %s, %s for fw update.(%d/%d)", UPDATE_FILE_PATH_1, UPDATE_FILE_PATH_2, i+1, GUP_SEARCH_FILE_TIMES);
@@ -2496,7 +2496,7 @@ u8 gup_init_update_proc(struct i2c_client *client)
 
 //******************* For GT9XXF Start ********************//
 
-#define FL_UPDATE_PATH              "/data/_fl_update_.bin"
+#define FL_UPDATE_PATH              "/custom/xbin/_fl_update_.bin"
 #define FL_UPDATE_PATH_SD           "/sdcard/_fl_update_.bin" 
 
 #define GUP_FW_CHK_SIZE              256

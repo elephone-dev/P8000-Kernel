@@ -293,7 +293,9 @@ static inline void ledtrig_cpu(enum cpu_led_event evt)
  *
  *
  */
+#ifndef GPIO_LCD_BL_EN
 #define LED_INCREASE_LED_LEVEL_MTKPATCH
+#endif
 #ifdef LED_INCREASE_LED_LEVEL_MTKPATCH
 #define LED_RESERVEBIT_SHIFT 16
 #define LED_RESERVEBIT_PATTERN 1

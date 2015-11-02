@@ -66,16 +66,10 @@ static CHARGER_TYPE g_charger_type = CHARGER_UNKNOWN;
 int wireless_charger_gpio_number   = (168 | 0x80000000); 
 #endif
 
-#if 0
-#include <cust_gpio_usage.h>
-int gpio_number   = GPIO_SWCHARGER_EN_PIN; 
-int gpio_off_mode = GPIO_SWCHARGER_EN_PIN_M_GPIO;
-int gpio_on_mode  = GPIO_SWCHARGER_EN_PIN_M_GPIO;
-#else
-int gpio_number   = (19 | 0x80000000); 
-int gpio_off_mode = 0;
-int gpio_on_mode  = 0;
-#endif
+int gpio_number   = GPIO_CHR_CE_PIN;
+int gpio_off_mode = GPIO_MODE_00;
+int gpio_on_mode  = GPIO_MODE_00;
+
 int gpio_off_dir  = GPIO_DIR_OUT;
 int gpio_off_out  = GPIO_OUT_ONE;
 int gpio_on_dir   = GPIO_DIR_OUT;
@@ -620,6 +614,10 @@ static void hw_bc11_done(void)
 		array_size = GETARRAYNUM(CS_VTH);
 		set_chr_current = bmt_find_closest_level(CS_VTH, array_size, current_value);
 		register_value = charging_parameter_to_value(CS_VTH, array_size ,set_chr_current);
+		if(register_value > 6)
+		{
+		    register_value = 6;
+		}
 		fan5405_set_iocharge(register_value);
 	}
 	return status;

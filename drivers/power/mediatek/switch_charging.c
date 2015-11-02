@@ -719,12 +719,16 @@ static void pchr_turn_on_charging(void)
 			g_temp_CC_value = AC_CHARGER_CURRENT;
 			battery_log(BAT_LOG_FULL,
 					    "USB_CURRENT_UNLIMITED, use AC_CHARGER_CURRENT\n");
-		} else if (g_bcct_flag == 1) {
+		} 
+#if !defined(CONFIG_MTK_FAN5405_SUPPORT)  // aka.jiang add
+		else if (g_bcct_flag == 1) {
 			select_charging_curret_bcct();
 
 			battery_log(BAT_LOG_FULL,
 					    "[BATTERY] select_charging_curret_bcct !\n");
-		} else {
+		} 
+#endif
+		else {
 			select_charging_curret();
 
 			battery_log(BAT_LOG_FULL, "[BATTERY] select_charging_curret !\n");

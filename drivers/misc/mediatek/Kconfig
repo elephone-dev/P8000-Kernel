@@ -294,6 +294,13 @@ config CUSTOM_KERNEL_BAROMETER
 	help
 	  To detect barometer raw data
 
+#aratek fingerprint
+config CUSTOM_KERNEL_FINGERPRINT
+        bool "CUSTOM_KERNEL_FINGERPRINT"
+        help
+          Fingerprint sensor driver
+#aratek end
+
 config MTK_SENSOR_HUB_SUPPORT
 	bool "MTK_SENSOR_HUB_SUPPORT"
 	help

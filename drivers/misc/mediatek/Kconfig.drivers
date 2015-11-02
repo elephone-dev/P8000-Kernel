@@ -159,6 +159,10 @@ config MTK_C2K_DATA_PPP_SUPPORT
 	bool "MTK_C2K_DATA_PPP_SUPPORT"
 	default n
 
+config MTK_C2K_OM_SOLUTION1
+	bool "C2K OM solution1 support"
+	default n
+
 config MTK_IRAT_SUPPORT
 	bool "MTK_IRAT_SUPPORT"
 	depends on MTK_NET_CCMNI
@@ -992,6 +996,10 @@ config MTK_MC3410_NEW
 config MTK_MPU6050G_NEW
 	bool "MPU6050G for MediaTek package"
 	default n
+	
+config MTK_MC6470_ACC
+	bool "MC6470 ACC(ACC+MAG) sensor for MediaTek package"
+	default n
 
 config MTK_MPU6050G
 	bool "MPU6050G for MediaTek package"
@@ -1032,7 +1040,15 @@ config MTK_MXC400X_NEW
 config MTK_DA213
         bool "DA213 for MediaTek package"
         default n
-        
+
+config MTK_GMA303
+        bool "GMA303 for MediaTek package"
+        default n
+
+config MTK_MC6470_ACC
+	bool "MC6470 ACC(ACC+MAG) sensor for MediaTek package"
+	default n
+	
 # Gyro sensor
 config MTK_MPU3050C
 	bool "MPU3050C for MediaTek package"
@@ -1084,6 +1100,14 @@ config MTK_AKM09911
 	
 config MTK_AKM09911_NEW
 	bool "AKM09911 for MediaTek package"
+	default n
+	
+config MTK_MC64XX
+	bool "MC64XX for MediaTek package"
+	default n
+	
+config MTK_MC6470
+	bool "MC64XX for MediaTek package"
 	default n
 
 config MTK_HSCDTD006
@@ -1154,10 +1178,33 @@ config MTK_MMC3524X
 	bool "MTK_MMC3524X for MediaTek package"
 	default n
 
+config MTK_MC6470
+	bool "MC6470 MAG(ACC+MAG) sensor for MediaTek package"
+	default n
+
+config MTK_QMCX983
+	bool "QMCX983 MAG sensor for MediaTek package"
+	default n
+
+config MTK_AF7133E
+	bool "AF7133E for MediaTek package"
+	default n
 # Barometer sensor
 config MTK_BMP180_NEW
 	bool "BMP180 for MediaTek package"
 	default n
+
+#aratek fingerprint
+config MTK_ARS3022
+        bool "ARS3022 for aratek fingerprint"
+        default n
+#aratek end
+
+#sileade fingerprint
+config MTK_SL6162
+        bool "SL6162 for sileade fingerprint"
+        default n
+#sileade end
 
 # Touch Panel
 config MTK_TOUCHPANEL

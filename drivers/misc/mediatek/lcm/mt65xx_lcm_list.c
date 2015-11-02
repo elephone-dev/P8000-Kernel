@@ -239,11 +239,23 @@ extern LCM_DRIVER st7789h2_dbi_lcm_drv;
 extern LCM_DRIVER ili9881_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER ili9881_hd720_dsi_vdo_k503_lcm_drv;
 extern LCM_DRIVER ili9881_hd720_dsi_vdo_k551_lcm_drv;
+extern LCM_DRIVER r61318a1_hd720_dsi_vdo_k503_lcm_drv;
 extern LCM_DRIVER nt35596_fhd_dsi_vdo_drv;
+extern LCM_DRIVER nt35596_fhd_dsi_vdo_k505_drv;
 extern LCM_DRIVER otm1901_fhd_dsi_vdo_lcm_drv;
+extern LCM_DRIVER otm1901_lide_fhd_dsi_vdo_lcm_drv;
 extern LCM_DRIVER fl10802_dsi_vdo_fwvga_drv;
+extern LCM_DRIVER fl10802_liangbang_dsi_vdo_fwvga_drv;
 extern LCM_DRIVER jd9367_hd720_dsi_vdo_lcm_drv;
 extern LCM_DRIVER fl11280_hd720_dsi_vdo_lcm_drv;
+extern LCM_DRIVER hx8399_fhd_dsi_vdo_lcm_drv;
+#if defined(OTM9605A_HONGZHAN_QHD_VDO)
+    extern LCM_DRIVER otm9605a_hongzhan_qhd_vdo_lcm_drv;
+#endif
+#if defined(NT35517_DELITAI_QHD_VDO)
+    extern LCM_DRIVER nt35517_delitai_qhd_vdo_lcm_drv;
+#endif
+extern LCM_DRIVER hx8394f_hd720_dsi_vdo_lcm_drv;
 
 LCM_DRIVER* lcm_driver_list[] =
 {
@@ -1105,21 +1117,47 @@ LCM_DRIVER* lcm_driver_list[] =
         &ili9881_hd720_dsi_vdo_k551_lcm_drv,
 #endif
 
+#if defined(R61318A1_HD720_DSI_VDO_K503)
+        &r61318a1_hd720_dsi_vdo_k503_lcm_drv,
+#endif
+
 #if defined(NT35596_FHD_DSI_VDO)
         &nt35596_fhd_dsi_vdo_drv,
+#endif
+#if defined(NT35596_FHD_DSI_VDO_K505)
+        &nt35596_fhd_dsi_vdo_k505_drv,
 #endif
 
 #if defined(OTM1901_FHD_DSI_VDO)
         &otm1901_fhd_dsi_vdo_lcm_drv,
 #endif
+#if defined(OTM1901_LIDE_FHD_DSI_VDO)
+        &otm1901_lide_fhd_dsi_vdo_lcm_drv,
+#endif
 #if defined(FL10802_DSI_VDO_FWVGA)
         &fl10802_dsi_vdo_fwvga_drv,
+#endif
+#if defined(FL10802_LIANGBANG_DSI_VDO_FWVGA)
+        &fl10802_liangbang_dsi_vdo_fwvga_drv,
 #endif
 #if defined(JD9367_HD720_DSI_VDO)
 	&jd9367_hd720_dsi_vdo_lcm_drv,
 #endif
 #if defined(FL11280_HD720_DSI_VDO)
         &fl11280_hd720_dsi_vdo_lcm_drv,
+#endif
+#if defined(HX8399_FHD_DSI_VDO)
+        &hx8399_fhd_dsi_vdo_lcm_drv,
+#endif
+#if defined(OTM9605A_HONGZHAN_QHD_VDO)
+    &otm9605a_hongzhan_qhd_vdo_lcm_drv,
+#endif
+
+#if defined(NT35517_DELITAI_QHD_VDO)
+    &nt35517_delitai_qhd_vdo_lcm_drv,
+#endif
+#if defined(HX8394F_HD720_DSI_VDO)
+    &hx8394f_hd720_dsi_vdo_lcm_drv,
 #endif
 };
 

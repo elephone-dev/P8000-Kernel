@@ -29,15 +29,15 @@
 #define FG_METER_RESISTANCE 	0
 
 /* Qmax for battery  */
-#define Q_MAX_POS_50	4400
-#define Q_MAX_POS_25	4400
-#define Q_MAX_POS_0		4400
-#define Q_MAX_NEG_10	4298
+#define Q_MAX_POS_50	2807
+#define Q_MAX_POS_25	2807
+#define Q_MAX_POS_0		2800
+#define Q_MAX_NEG_10	2800
 
-#define Q_MAX_POS_50_H_CURRENT	4300
-#define Q_MAX_POS_25_H_CURRENT	4300
-#define Q_MAX_POS_0_H_CURRENT	  3966
-#define Q_MAX_NEG_10_H_CURRENT	2130
+#define Q_MAX_POS_50_H_CURRENT	2756
+#define Q_MAX_POS_25_H_CURRENT	2756
+#define Q_MAX_POS_0_H_CURRENT	2264
+#define Q_MAX_NEG_10_H_CURRENT	2264
 
 
 /* Discharge Percentage */
@@ -51,7 +51,7 @@
 #else
 #define CUST_TRACKING_POINT  1
 #endif
-#define CUST_R_SENSE         20//20mO for k05ss
+#define CUST_R_SENSE         68//20//20mO for k05ss
 #define CUST_HW_CC 		    0
 #define AGING_TUNING_VALUE   103
 #define CUST_R_FG_OFFSET    0
@@ -59,7 +59,7 @@
 #define OCV_BOARD_COMPESATE	0 //mV 
 #define R_FG_BOARD_BASE		1000
 #define R_FG_BOARD_SLOPE	1000 //slope
-#define CAR_TUNE_VALUE		101 //1.00
+#define CAR_TUNE_VALUE		97 //1.00
 
 
 /* HW Fuel gague  */
@@ -96,7 +96,7 @@
 #define DIFFERENCE_HWOCV_VBAT		30
 
 /* fg 1.0 */
-#define CUST_POWERON_DELTA_CAPACITY_TOLRANCE	40
+#define CUST_POWERON_DELTA_CAPACITY_TOLRANCE	5//30
 #define CUST_POWERON_LOW_CAPACITY_TOLRANCE		5
 #define CUST_POWERON_MAX_VBAT_TOLRANCE			90
 #define CUST_POWERON_DELTA_VBAT_TOLRANCE		30

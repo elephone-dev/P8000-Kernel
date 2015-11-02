@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+﻿////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (c) 2006-2014 MStar Semiconductor, Inc.
 // All rights reserved.
@@ -70,7 +70,7 @@ extern u8 g_HotKnotState;
 /*=============================================================*/
 // GLOBAL FUNCTION DEFINITION
 /*=============================================================*/
-#define TPD_PROXIMITY
+//#define TPD_PROXIMITY
 #ifdef TPD_PROXIMITY
 #include <alsps.h>
 #include <linux/hwmsensor.h>
@@ -216,7 +216,11 @@ int register_mstar_alsps(void)
 	}
 	return 0;
 }
-
+#else
+int register_mstar_alsps(void)
+{
+	return -1;
+}
 #endif
 
 

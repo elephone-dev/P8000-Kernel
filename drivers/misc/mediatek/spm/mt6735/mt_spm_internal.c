@@ -7,6 +7,7 @@
 #include <linux/of_fdt.h>
 #include <mach/mt_ccci_common.h>
 #include <mach/mt_vcore_dvfs.h>
+#include <mach/upmu_common.h>
 
 #include "mt_spm_internal.h"
 
@@ -341,6 +342,44 @@ void __spm_dbgout_md_ddr_en(bool enable)
 	spm_write(SPM_PCM_DEBUG_CON, !!enable);
 }
 
+u32 __spm_dpidle_sodi_set_pmic_setting(void)
+{
+	u32 vsram_vosel_on_lb = 0;
+	u32 vsram_vosel_offset = 0;
+	u32 vsram_vosel_delta = 0;
+
+	pmic_read_interface_nolock(MT6328_PMIC_VSRAM_VOSEL_ON_LB_ADDR,
+								&vsram_vosel_on_lb,
+								MT6328_PMIC_VSRAM_VOSEL_ON_LB_MASK,
+								MT6328_PMIC_VSRAM_VOSEL_ON_LB_SHIFT);
+	pmic_read_interface_nolock(MT6328_PMIC_VSRAM_VOSEL_OFFSET_ADDR,
+								&vsram_vosel_offset,
+								MT6328_PMIC_VSRAM_VOSEL_OFFSET_MASK,
+								MT6328_PMIC_VSRAM_VOSEL_OFFSET_SHIFT);
+	pmic_read_interface_nolock(MT6328_PMIC_VSRAM_VOSEL_DELTA_ADDR,
+								&vsram_vosel_delta,
+								MT6328_PMIC_VSRAM_VOSEL_DELTA_MASK,
+								MT6328_PMIC_VSRAM_VOSEL_DELTA_SHIFT);
+
+	/* delta = 0v */
+	spm_write(SPM_PCM_RESERVE3, (vsram_vosel_offset << 8) | vsram_vosel_delta);
+
+	/* 0.85v */
+	pmic_config_interface_nolock(MT6328_PMIC_VSRAM_VOSEL_ON_LB_ADDR,
+									(vsram_vosel_on_lb & 0xff80) | 0x28,
+									MT6328_PMIC_VSRAM_VOSEL_ON_LB_MASK,
+									MT6328_PMIC_VSRAM_VOSEL_ON_LB_SHIFT);
+
+	return vsram_vosel_on_lb;
+}
+
+void __spm_dpidle_sodi_restore_pmic_setting(u32 vsram_vosel_on_lb)
+{
+	pmic_config_interface_nolock(MT6328_PMIC_VSRAM_VOSEL_ON_LB_ADDR,
+									vsram_vosel_on_lb,
+									MT6328_PMIC_VSRAM_VOSEL_ON_LB_MASK,
+									MT6328_PMIC_VSRAM_VOSEL_ON_LB_SHIFT);
+}
 
 #ifdef CONFIG_ARCH_MT6753 /************/
 #include <mach/mt_clkmgr.h>

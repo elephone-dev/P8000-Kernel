@@ -131,7 +131,7 @@ struct ccmni_ccci_ops sdio_ccmni_ops = {
 	.ccmni_ver			= CCMNI_DRV_V0,	//CCMNI_DRV_VER
 	.ccmni_num			= CCMNI_INTF_COUNT,
 	.name				= "cc3mni",  //"ccmni" or "cc2mni" or "ccemni"
-#if defined (CONFIG_MTK_IRAT_SUPPORT) && defined (CONFIG_MTK_MD_IRAT_SUPPORT)
+#if defined (CONFIG_MTK_IRAT_SUPPORT)
 	.md_ability			= MODEM_CAP_CCMNI_IRAT | MODEM_CAP_TXBUSY_STOP,
 	.irat_md_id			= MD_SYS1,
 #else
@@ -1590,9 +1590,10 @@ static void sdio_write_port_work(struct work_struct *work)
 	ready_data_count = kfifo_len(&port->transmit_fifo);
 	spin_unlock_irqrestore(&port->write_lock, flags);
 
-	if((port->index == (EXCP_CTRL_CH_ID-1)) || (port->index == (EXCP_MSG_CH_ID-1))){
-		LOGPRT(LOG_INFO,  "port%d write work sched(len%d,fc%d)\n", port->index, ready_data_count, atomic_read(&port->sflow_ctrl_state));
-	}
+	if((port->index == (EXCP_CTRL_CH_ID-1)) || (port->index == (EXCP_MSG_CH_ID-1)))
+		LOGPRT(LOG_INFO,  "port%d write work sched(len %d,fc %d, cnt %d)\n", 
+			port->index, ready_data_count, atomic_read(&port->sflow_ctrl_state), atomic_read(&modem->tx_fifo_cnt));
+
 	
 	while(ready_data_count > 0){
 		//for AT command problem of /r;
@@ -1647,7 +1648,10 @@ static void sdio_write_port_work(struct work_struct *work)
 #endif
 
 			write_len = (todo + sizeof(struct sdio_msg_head) + 3) & ~0x03;  /* Round up to nearest multiple of 4 */
-			LOGPRT(LOG_DEBUG,  "%s %d write %d bytes.\n", __func__,__LINE__, write_len);
+			if((port->index == (EXCP_CTRL_CH_ID-1)) || (port->index == (EXCP_MSG_CH_ID-1)))
+				LOGPRT(LOG_INFO,  "%s %d write %d bytes.\n", __func__,__LINE__, write_len);
+			else
+				LOGPRT(LOG_DEBUG,  "%s %d write %d bytes.\n", __func__,__LINE__, write_len);
 			modem_sdio_write(modem, SDIO_WRITE_ADDR, modem->trans_buffer, write_len);
 			left -= todo;
 			
@@ -3291,8 +3295,8 @@ static void modem_sdio_write(struct sdio_modem *modem, int addr,
 	spin_unlock_irqrestore(&modem->status_lock, flags);
 
 	wait_event(modem->wait_tx_done_q, (TX_FIFO_SZ == atomic_read(&modem->tx_fifo_cnt)));
-	if(ch_id == CTRL_CH_ID){
-		printk(KERN_DEBUG "[C2K] after wait tx done\n");
+	if(ch_id == CTRL_CH_ID || ch_id == EXCP_MSG_CH_ID ||  ch_id == EXCP_CTRL_CH_ID){
+		printk(KERN_DEBUG "[C2K] ch %u after wait tx done\n", ch_id);
 	}
 	spin_lock_irqsave(&modem->status_lock, flags);
 	if (modem->status == MD_OFF){

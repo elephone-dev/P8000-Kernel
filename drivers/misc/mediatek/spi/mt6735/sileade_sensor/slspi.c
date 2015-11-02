@@ -1337,7 +1337,11 @@ static int __exit spidev_remove(struct spi_device *spi)
 }
 
 static int spidev_suspend(struct spi_device *spi, pm_message_t mesg)
-{
+{	
+	mt_set_gpio_mode(SPI_RESET_PIN,GPIO_MODE_GPIO);
+	mt_set_gpio_dir(SPI_RESET_PIN,GPIO_DIR_OUT);
+	mt_set_gpio_out(SPI_RESET_PIN,GPIO_OUT_ZERO);
+	
     struct spidev_data	*spidev = spi_get_drvdata(spi);
     if (spidev->wake_up_enable) {
         enable_irq(spidev->irq);
@@ -1350,6 +1354,9 @@ static int spidev_suspend(struct spi_device *spi, pm_message_t mesg)
 }
 static int spidev_resume(struct spi_device *spi)
 {
+	mt_set_gpio_mode(SPI_RESET_PIN,GPIO_MODE_GPIO);
+	mt_set_gpio_dir(SPI_RESET_PIN,GPIO_DIR_OUT);
+	mt_set_gpio_out(SPI_RESET_PIN,GPIO_OUT_ONE);
     struct spidev_data	*spidev = spi_get_drvdata(spi);
     if (spidev->wake_up_enable) {
         enable_irq(spidev->irq);

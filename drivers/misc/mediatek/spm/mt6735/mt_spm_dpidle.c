@@ -349,30 +349,15 @@ U32 g_sys_ck_sel = 0;
 static u32 vsram_vosel_on_lb;
 static void spm_dpidle_pre_process(void)
 {
-/*  //TODO
-    spm_i2c_control(I2C_CHANNEL, 1);//D1,D2 no ext bulk
-    g_bus_ctrl=spm_read(0xF0001070);
-    spm_write(0xF0001070 , g_bus_ctrl | (1 << 21)); //bus dcm disable
-    g_sys_ck_sel = spm_read(0xF0001108);
-    //spm_write(0xF0001108 , g_sys_ck_sel &~ (1<<1) );
-    spm_write(0xF0001108 , 0x0);
-    spm_write(0xF0000204 , spm_read(0xF0000204) | (1 << 0));  // BUS 26MHz enable 
-*/
     /* set PMIC WRAP table for deepidle power control */
     mt_cpufreq_set_pmic_phase(PMIC_WRAP_PHASE_DEEPIDLE);
     
-    vsram_vosel_on_lb = pmic_get_register_value(PMIC_VSRAM_VOSEL_ON_LB);
-    spm_write(SPM_PCM_RESERVE3,(pmic_get_register_value(PMIC_VSRAM_VOSEL_OFFSET)<<8)|pmic_get_register_value(PMIC_VSRAM_VOSEL_DELTA));//delta = 0v
-    pmic_set_register_value(PMIC_VSRAM_VOSEL_ON_LB,(vsram_vosel_on_lb&0xff80)|0x28);//0.85v
+    vsram_vosel_on_lb = __spm_dpidle_sodi_set_pmic_setting();
 }
 
 static void spm_dpidle_post_process(void)
 {
-/*   //TODO
-    spm_i2c_control(I2C_CHANNEL, 0);
-    spm_write(0xF0001070 , g_bus_ctrl); //26:26 enable 
-*/
-    pmic_set_register_value(PMIC_VSRAM_VOSEL_ON_LB,vsram_vosel_on_lb); 
+    __spm_dpidle_sodi_restore_pmic_setting(vsram_vosel_on_lb);
     /* set PMIC WRAP table for normal power control */
     mt_cpufreq_set_pmic_phase(PMIC_WRAP_PHASE_NORMAL);       
 }

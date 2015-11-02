@@ -175,6 +175,9 @@ void ccci_config_modem(struct ccci_modem *md)
 	md->smem_layout.ccci_exp_smem_ccci_debug_size = CCCI_SMEM_CCCI_DEBUG_SIZE;
 	md->smem_layout.ccci_exp_smem_mdss_debug_vir = md->smem_layout.ccci_exp_smem_base_vir+CCCI_SMEM_OFFSET_MDSS_DEBUG;
 	md->smem_layout.ccci_exp_smem_mdss_debug_size = CCCI_SMEM_MDSS_DEBUG_SIZE;
+	md->smem_layout.ccci_exp_smem_sleep_debug_vir = md->smem_layout.ccci_exp_smem_base_vir +
+		md->smem_layout.ccci_exp_smem_size- CCCI_SMEM_SLEEP_MODE_DBG_SIZE;
+	md->smem_layout.ccci_exp_smem_sleep_debug_size = CCCI_SMEM_SLEEP_MODE_DBG_DUMP;
 	// exception record start address
 	md->smem_layout.ccci_exp_rec_base_vir = md->smem_layout.ccci_exp_smem_base_vir+CCCI_SMEM_OFFSET_EXREC;
 	
@@ -408,6 +411,9 @@ int exec_ccci_kern_func_by_md_id(int md_id, unsigned int id, char *buf, unsigned
         if(ret == 0)
             ret = ccci_send_virtual_md_msg(md, CCCI_MONITOR_CH, CCCI_MD_MSG_RESET, 0);
 		break;                
+	case ID_DUMP_MD_SLEEP_MODE:
+		md->ops->dump_info(md, DUMP_FLAG_SMEM_MDSLP, NULL, 0);
+		break;
 	default:
 		ret = -CCCI_ERR_FUNC_ID_ERROR;
 		break;

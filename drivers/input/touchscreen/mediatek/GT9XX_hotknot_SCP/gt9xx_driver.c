@@ -27,6 +27,8 @@
 #endif
 
 #include <linux/sched.h>
+#include <linux/sysfs.h>
+#include <linux/kobject.h>
 
 extern struct tpd_device *tpd;
 #ifdef VELOCITY_CUSTOM
@@ -1497,7 +1499,7 @@ static s32 gtp_init_panel(struct i2c_client *client)
             if (1)//(opr_buf[0] < 90)
             {
                 grp_cfg_version = send_cfg_buf[sensor_id][0];       // backup group config version
-                send_cfg_buf[sensor_id][0] = 0x00;
+                //send_cfg_buf[sensor_id][0] = 0x00;
                 #if GTP_CHARGER_SWITCH
 				charger_grp_cfg_version = send_charger_cfg_buf[sensor_id][0];
 				send_charger_cfg_buf[sensor_id][0] = 0x00;
@@ -2223,6 +2225,8 @@ static int tpd_irq_registration(void)
 }
 #endif
 
+u8 fw_id = 0, cfg_id = 0;
+u8 fw_id_low = 0,fw_id_high = 0;
 static int tpd_registration(void *client)
 {
 		s32 err = 0;
@@ -2375,7 +2379,21 @@ static int tpd_registration(void *client)
 			GTP_ERROR("Create update thread error.");
 		}
 #endif
-	
+		ret = i2c_read_bytes(client, 0x8144, &fw_id_low, 1);
+		if (ret < 0)
+		{
+			GTP_ERROR("i2c_read_bytes error.");
+		}
+		ret = i2c_read_bytes(client, 0x8145, &fw_id_high, 1);
+		if (ret < 0)
+		{
+			GTP_ERROR("i2c_read_bytes error.");
+		}
+		ret = i2c_read_bytes(client, 0x8047, &cfg_id, 1);
+		if (ret < 0)
+		{
+			GTP_ERROR("i2c_read_bytes error.");
+		}
 #ifdef TPD_PROXIMITY
 		//obj_ps.self = cm3623_obj;
 		obj_ps.polling = 0; 		//0--interrupt mode;1--polling mode;
@@ -2394,15 +2412,40 @@ static int tpd_registration(void *client)
 	   GTP_ERROR("tpd registration done.");
 		return 0;
 }
+
+static ssize_t tp_fw_status_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d--%x%x\n", cfg_id,fw_id_high,fw_id_low);
+} 
+
+static ssize_t tp_cfg_status_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", cfg_id);
+} 
+
+static DEVICE_ATTR(fw_status, S_IRUGO,
+		tp_fw_status_show, NULL);
+static struct attribute *tp_attributes[] = {
+	&dev_attr_fw_status.attr,
+	NULL
+};
+
+static struct attribute_group tp_attribute_group = {
+	.attrs = tp_attributes
+};
+
 static s32 tpd_i2c_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
 	int err = 0;
 	int count = 0;
+	struct kobject *tp_kobj;
 	GTP_INFO("tpd_i2c_probe start.");
 
     if (RECOVERY_BOOT == get_boot_mode())
         return 0;
-    
+   
 	probe_thread =kthread_run(tpd_registration, client, "tpd_probe");
 	if (IS_ERR(probe_thread))
 	{
@@ -2417,7 +2460,20 @@ static s32 tpd_i2c_probe(struct i2c_client *client, const struct i2c_device_id *
 		if(check_flag)
 			break;
 	}while(count < 50);
+	tp_kobj = kobject_create_and_add("tp", NULL);
+	if (!tp_kobj) {
+		goto error_sysfs;
+	}
+	err = sysfs_create_group(tp_kobj,&tp_attribute_group);
+	if (err < 0)
+	{
+		printk("sysfs_create_group: %d\n", err);
+		goto error_sysfs;
+	}
 	GTP_INFO("tpd_i2c_probe done.count = %d, flag = %d",count,check_flag);
+	return 0;
+error_sysfs:
+	sysfs_remove_group(tp_kobj, &tp_attribute_group);
 	return 0;
 }
 
@@ -3871,7 +3927,6 @@ static void tpd_suspend(struct early_suspend *h)
 static void tpd_resume(struct early_suspend *h)
 {
     s32 ret = -1;
-
     printk("mtk-tpd: %s start\n", __FUNCTION__);
 #ifdef TPD_PROXIMITY
 
@@ -3898,7 +3953,6 @@ static void tpd_resume(struct early_suspend *h)
 	}
 	
 #endif
-
 #if HOTKNOT_BLOCK_RW
     if(hotknot_paired_flag)
     {

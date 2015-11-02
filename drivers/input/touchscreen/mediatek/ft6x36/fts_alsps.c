@@ -53,7 +53,9 @@ static struct alsps_init_info fts_init_info = {
 
 static int __init fts_init(void)
 {
+#ifdef TPD_PROXIMITY
 	alsps_driver_add(&fts_init_info);
+#endif
 	return 0;
 }
 /*----------------------------------------------------------------------------*/

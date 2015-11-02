@@ -1074,6 +1074,7 @@ void fgauge_construct_battery_profile(kal_int32 temperature, BATTERY_PROFILE_STR
 
 void fgauge_construct_r_table_profile(kal_int32 temperature, R_PROFILE_STRUC_P temp_profile_p)
 {
+	dump_stack();
 	R_PROFILE_STRUC_P low_profile_p, high_profile_p;
 	kal_int32 low_temperature, high_temperature;
 	int i, saddles;

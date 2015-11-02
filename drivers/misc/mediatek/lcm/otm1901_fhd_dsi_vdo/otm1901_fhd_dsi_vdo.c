@@ -341,6 +341,9 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
 
 		{0x00,1,{0xB3}},
 		{0xC0,1,{0xCC}},
+		
+		//	{0x00,1,{0xB3}},
+		//{0xC0,1,{0x7C}},
 		{REGFLAG_DELAY, 10, {}},
 
 		{0x00,1,{0xBC}},
@@ -463,13 +466,59 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
 		{0x00,1,{0x00}},
 		{0xE6,24,{0x1,0xC,0x19,0x27,0x31,0x39,0x46,0x58,0x63,0x77,0x83,0x8C,0x6D,0x69,0x66,0x58,0x47,0x37,0x2C,0x26,0x1E,0x14,0xF,0x6}},
 
+#if 1
+		{0x00,1,{0x89}},
+		{0xF3,1,{0x5A}},
+		{0x00,1,{0x90}},
+		{0xF3,1,{0x01}},
+		{0x00,1,{0x82}},
+		{0xA5,1,{0x1F}},
+		{0x00,1,{0xC2}},
+		{0xC5,1,{0x1C}},
+		{0x00,1,{0x80}}, 
+		{0xc4,1,{0x06}},
+		{0x00,1,{0xC1}},
+		{0xF5,1,{0x15}},  
+		{0x00,1,{0xC3}},
+		{0xF5,1,{0x15}},  
+		{0x00,1,{0xC9}},
+		{0xF5,1,{0x15}},
+		{0x00,1,{0xCB}},
+		{0xF5,1,{0x15}},
+		{0x00,1,{0xCD}},  
+		{0xF5,1,{0x15}},  
+		{0x00,1,{0x97}},  
+		{0xF5,1,{0x19}},  
+		{0x00,1,{0x99}},
+		{0xF5,1,{0x19}},  
+		{0x00,1,{0xB9}},
+		{0xC0,1,{0x11}},
+		{0x00,1,{0x8D}},
+		{0xF5,1,{0x20}},  
+		{0x00,1,{0xDB}},
+		{0xf5,1,{0x19}},
+#endif
 
-		{0x00,1,{0x00}},
-	 	{0xFF,3,{0xFF,0xFF,0xFF}}, 
+	//	{0x00,1,{0x00}},
+	 //	{0xFF,3,{0xFF,0xFF,0xFF}}, 
 	{0x11,1,{0x00}},
 	{REGFLAG_DELAY, 120, {}},
 	{0x29,1,{0x00}},	
 	{REGFLAG_DELAY, 20, {}},
+	
+							{0x22,0,{0x00}},                  
+            {REGFLAG_DELAY, 150, {}}, 
+			
+										{0x22,0,{0x00}},                  
+            {REGFLAG_DELAY, 150, {}}, 
+            
+            {0x00,1,{0xB3}},         
+			{0xC0,1,{0xcc}}, //Initial must 1+2dot
+			    	
+			    	{0x00,1,{0x00}},             //Orise mode disable
+			    	{0xff,3,{0xff,0xff,0xff}}, 
+            
+						{0x13,0,{0x00}}, 
 	
 	{REGFLAG_END_OF_TABLE, 0x00, {}}
 };
@@ -688,6 +737,10 @@ static struct LCM_setting_table lcm_sleep_out_setting[] = {
 
 static struct LCM_setting_table lcm_sleep_mode_in_setting[] = {
 	// Display off sequence
+	{0x22, 0, {0x00}},
+	{REGFLAG_DELAY, 150, {}},	
+								{0x22,0,{0x00}},                  
+            {REGFLAG_DELAY, 150, {}}, 
 	{0x28, 1, {0x00}},
 	{REGFLAG_DELAY, 200, {}},
 
@@ -797,7 +850,7 @@ static void lcm_get_params(LCM_PARAMS *params)
 #if (LCM_DSI_CMD_MODE)
 	params->dsi.PLL_CLOCK = 200; //this value must be in MTK suggested table
 #else
-	params->dsi.PLL_CLOCK = 500; //this value must be in MTK suggested table
+	params->dsi.PLL_CLOCK = 450; //this value must be in MTK suggested table
 #endif
 #else
 	params->dsi.pll_div1 = 0;
@@ -862,8 +915,12 @@ static void lcm_init(void)
 
 static void lcm_suspend(void)
 {
+#if 1
 	unsigned int data_array[16];
-
+	data_array[0]=0x00220500; // Display Off
+	dsi_set_cmdq(data_array, 1, 1);
+	MDELAY(100); // 100ms
+	
 	data_array[0]=0x00280500; // Display Off
 	dsi_set_cmdq(data_array, 1, 1);
 	
@@ -876,10 +933,18 @@ static void lcm_suspend(void)
 	
 	SET_RESET_PIN(1);	
 	SET_RESET_PIN(0);
-	MDELAY(100); // 1ms
+	MDELAY(100); // 100ms
 	
 	SET_RESET_PIN(1);
-	MDELAY(120);      
+	MDELAY(120);   
+#else
+	mt_set_gpio_mode(GPIO_LCD_BIAS_ENP_PIN, GPIO_MODE_00);
+	mt_set_gpio_dir(GPIO_LCD_BIAS_ENP_PIN, GPIO_DIR_OUT);
+	mt_set_gpio_out(GPIO_LCD_BIAS_ENP_PIN, GPIO_OUT_ZERO);
+
+	SET_RESET_PIN(0);
+	MDELAY(120); 
+#endif   
 
 }
 
@@ -950,7 +1015,22 @@ static unsigned int lcm_compare_id(void)
 #else
 	printk("%s,  otm1901 id = 0x%08x\n", __func__, id);
 #endif
-    return (LCM_ID == id)?1:0;
+
+#ifdef GPIO_LCD_MAKER_ID
+	int read_status;
+	if(LCM_ID == id){
+		mt_set_gpio_mode(GPIO_LCD_MAKER_ID, GPIO_LCD_MAKER_ID_M_GPIO);
+		mt_set_gpio_pull_enable(GPIO_LCD_MAKER_ID, GPIO_PULL_ENABLE);
+		mt_set_gpio_dir(GPIO_LCD_MAKER_ID, GPIO_DIR_IN);
+		MDELAY(10);
+		read_status = mt_get_gpio_in(GPIO_LCD_MAKER_ID);
+		
+		return (read_status == 1)?1:0;
+	}
+	else return 0;
+#else
+	return (LCM_ID == id)?1:0;
+#endif	
 }
 
 LCM_DRIVER otm1901_fhd_dsi_vdo_lcm_drv = 

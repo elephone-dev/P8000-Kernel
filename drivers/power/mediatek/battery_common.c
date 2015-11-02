@@ -590,9 +590,23 @@ static int battery_get_property(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_CAPACITY:
 		val->intval = data->BAT_CAPACITY;
+		if(50 == data->BAT_CAPACITY){
+			dump_stack();
+			printk("battery_get_property():BMT_status.UI_SOC = %d\n",BMT_status.UI_SOC);
+			printk("battery_get_property():data->BAT_CAPACITY = %d\n",data->BAT_CAPACITY);
+			printk("battery_get_property():BMT_status.bat_vol = %d\n",BMT_status.bat_vol);
+			printk("battery_get_property():data->BAT_batt_vol = %d\n",data->BAT_batt_vol);
+			printk("battery_get_property():data->BAT_batt_temp = %d\n",data->BAT_batt_temp);
+		}
+		// val->intval = 99;·
 		break;
 	case POWER_SUPPLY_PROP_batt_vol:
 		val->intval = data->BAT_batt_vol;
+		if(0 == data->BAT_batt_vol){
+			dump_stack();
+			printk("battery_get_property():BMT_status.bat_vol = %d",BMT_status.bat_vol);
+			printk("battery_get_property():data->BAT_batt_vol = %d",data->BAT_batt_vol);			
+		}
 		break;
 	case POWER_SUPPLY_PROP_batt_temp:
 		val->intval = data->BAT_batt_temp;
@@ -2743,7 +2757,6 @@ CHARGER_TYPE mt_charger_type_detection(void)
 		 if(g_battery_soc_ready == KAL_FALSE) {
 			if(BMT_status.nPercent_ZCV == 0)
 				battery_meter_initial();
-					
 			BMT_status.SOC = battery_meter_get_battery_percentage();
 		}
 
@@ -2858,9 +2871,17 @@ void update_battery_2nd_info(int status_smb, int capacity_smb, int present_smb)
 	g_smartbook_update = 1;
 #endif
 }
-
+kal_bool boot_flag = KAL_TRUE;
 void do_chrdet_int_task(void)
 {
+	//ALPS02229296++:when system boot,delay to get battery capacity until battery meter initial complete
+	if(KAL_TRUE == boot_flag)
+	{
+		battery_meter_initial();
+		mdelay(2);
+		boot_flag = KAL_FALSE;
+	}
+	//ALPS02229296--:when system boot,delay to get battery capacity until battery meter initial complete
 	if (g_bat_init_flag == KAL_TRUE) {
 		#if !defined(CONFIG_MTK_DUAL_INPUT_CHARGER_SUPPORT)
 		if (upmu_is_chr_det() == KAL_TRUE) {
@@ -2944,7 +2965,11 @@ void do_chrdet_int_task(void)
 
 			BMT_status.SOC = battery_meter_get_battery_percentage();
 		}
-
+		if(BMT_status.bat_vol == 0)
+		{//fake battery
+			dump_stack();
+			printk("do_chrdet_int_task(),fake battery\n");
+		}
 		if (BMT_status.bat_vol > 0) {
 			mt_battery_update_status();
 		}

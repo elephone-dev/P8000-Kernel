@@ -10,4 +10,5 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/gud/$(MTK_PLATFORM)/gud/MobiCore
 endif
 
 obj-$(CONFIG_MTK_SPI) += spi.o spi-dev.o
-obj-$(CONFIG_MTK_SPI) += sileade_sensor/
+obj-$(CONFIG_MTK_SL6162) += sileade_sensor/
+obj-$(CONFIG_MTK_ARS3022) += ars3022/

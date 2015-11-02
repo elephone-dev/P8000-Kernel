@@ -219,6 +219,91 @@ U32 pmic_config_interface (U32 RegNum, U32 val, U32 MASK, U32 SHIFT)
     return return_value;
 }
 
+U32 pmic_read_interface_nolock (U32 RegNum, U32 *val, U32 MASK, U32 SHIFT)
+{
+    U32 return_value = 0;
+
+#if defined(CONFIG_PMIC_HW_ACCESS_EN)
+    U32 pmic_reg = 0;
+    U32 rdata;
+
+	  /* pmic wrapper has spinlock protection. pmic do not to do it again */
+    //mt_read_byte(RegNum, &pmic_reg);
+    return_value= pwrap_wacs2(0, (RegNum), 0, &rdata);
+    pmic_reg=rdata;
+    if(return_value!=0)
+    {
+        PMICLOG("[pmic_read_interface] Reg[%x]= pmic_wrap read data fail\n", RegNum);
+        mutex_unlock(&pmic_access_mutex);
+        return return_value;
+    }
+    //PMICLOG"[pmic_read_interface] Reg[%x]=0x%x\n", RegNum, pmic_reg);
+
+    pmic_reg &= (MASK << SHIFT);
+    *val = (pmic_reg >> SHIFT);
+    //PMICLOG"[pmic_read_interface] val=0x%x\n", *val);
+
+#else
+    //PMICLOG("[pmic_read_interface] Can not access HW PMIC\n");
+#endif
+
+    return return_value;
+}
+
+U32 pmic_config_interface_nolock (U32 RegNum, U32 val, U32 MASK, U32 SHIFT)
+{
+    U32 return_value = 0;
+
+#if defined(CONFIG_PMIC_HW_ACCESS_EN)
+    U32 pmic_reg = 0;
+    U32 rdata;
+
+    /* pmic wrapper has spinlock protection. pmic do not to do it again */
+
+    //1. mt_read_byte(RegNum, &pmic_reg);
+    return_value= pwrap_wacs2(0, (RegNum), 0, &rdata);
+    pmic_reg=rdata;
+    if(return_value!=0)
+    {
+        PMICLOG("[pmic_config_interface] Reg[%x]= pmic_wrap read data fail\n", RegNum);
+        mutex_unlock(&pmic_access_mutex);
+        return return_value;
+    }
+    //PMICLOG"[pmic_config_interface] Reg[%x]=0x%x\n", RegNum, pmic_reg);
+
+    pmic_reg &= ~(MASK << SHIFT);
+    pmic_reg |= (val << SHIFT);
+
+    //2. mt_write_byte(RegNum, pmic_reg);
+    return_value= pwrap_wacs2(1, (RegNum), pmic_reg, &rdata);
+    if(return_value!=0)
+    {
+        PMICLOG("[pmic_config_interface] Reg[%x]= pmic_wrap read data fail\n", RegNum);
+        mutex_unlock(&pmic_access_mutex);
+        return return_value;
+    }
+    //PMICLOG"[pmic_config_interface] write Reg[%x]=0x%x\n", RegNum, pmic_reg);
+
+    #if 0
+    //3. Double Check
+    //mt_read_byte(RegNum, &pmic_reg);
+    return_value= pwrap_wacs2(0, (RegNum), 0, &rdata);
+    pmic_reg=rdata;
+    if(return_value!=0)
+    {
+        PMICLOG("[pmic_config_interface] Reg[%x]= pmic_wrap write data fail\n", RegNum);
+        mutex_unlock(&pmic_access_mutex);
+        return return_value;
+    }
+    PMICLOG("[pmic_config_interface] Reg[%x]=0x%x\n", RegNum, pmic_reg);
+    #endif
+
+#else
+    //PMICLOG("[pmic_config_interface] Can not access HW PMIC\n");
+#endif
+
+    return return_value;
+}
 
 //==============================================================================
 // PMIC lock/unlock APIs
@@ -3218,7 +3303,7 @@ kal_uint16 is_battery_remove_pmic(void)
 
 extern bool crystal_exist_status(void);
 
-extern void mt6311_hw_component_detect(void);
+extern kal_uint32 mt6311_hw_component_detect(void);
 
 void PMIC_INIT_SETTING_V1(void)
 {

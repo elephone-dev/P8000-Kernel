@@ -460,13 +460,13 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
 	{0x07,1,{0x01}},
 	{0x08,1,{0x00}},
 	{0x09,1,{0x01}},
-	{0x0A,1,{0x18}},
+	{0x0A,1,{0x19}},
 	{0x0B,1,{0x01}},
 	{0x0C,1,{0x00}},
 	{0x0D,1,{0x00}},
 	{0x0E,1,{0x00}},
-	{0x0F,1,{0x18}},
-	{0x10,1,{0x18}},
+	{0x0F,1,{0x19}},
+	{0x10,1,{0x19}},
 	{0x11,1,{0x00}},
 	{0x12,1,{0x00}},
 	{0x13,1,{0x00}},
@@ -764,15 +764,16 @@ static void lcm_get_params(LCM_PARAMS *params)
 	params->dsi.vertical_active_line					= FRAME_HEIGHT;
 
 	params->dsi.horizontal_sync_active				= 10;
-	params->dsi.horizontal_backporch				= 100;
-	params->dsi.horizontal_frontporch				= 40;
+	params->dsi.horizontal_backporch				= 150;//100;
+	params->dsi.horizontal_frontporch				= 80;//40;
 	params->dsi.horizontal_active_pixel				= FRAME_WIDTH;
     	//params->dsi.ssc_disable							= 1;
+    	params->dsi.HS_TRAIL = 15;
 #ifndef FPGA_EARLY_PORTING
 #if (LCM_DSI_CMD_MODE)
 	params->dsi.PLL_CLOCK = 200; //this value must be in MTK suggested table
 #else
-	params->dsi.PLL_CLOCK = 200; //this value must be in MTK suggested table
+	params->dsi.PLL_CLOCK = 225; //this value must be in MTK suggested table
 #endif
 #else
 	params->dsi.pll_div1 = 0;

@@ -87,7 +87,6 @@ struct wake_status suspend_info[20];
 u32 log_wakesta_cnt = 0;
 u32 log_wakesta_index = 0;
 u8 spm_snapshot_golden_setting = 0;
-#define VRF18_0_EN_CTRL	0x8
 /**********************************************************
  * PCM code for suspend
  **********************************************************/
@@ -1383,9 +1382,8 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
     mt_cpufreq_set_pmic_phase(PMIC_WRAP_PHASE_SUSPEND);
      
     //hw mode 
-    //pmic_read_interface(0x0A08, &temp_a, 0xFFFF, 0);
-    //temp_b = temp_a | VRF18_0_EN_CTRL;
-    //pmic_config_interface(0x0A08, temp_b, 0xFFFF, 0x0);
+    //temp_b = 0x1;
+    //pmic_config_interface_nolock(MT6328_PMIC_RG_VRF18_0_ON_CTRL_ADDR, temp_b, MT6328_PMIC_RG_VRF18_0_ON_CTRL_MASK, MT6328_PMIC_RG_VRF18_0_ON_CTRL_SHIFT);
     /*
     temp_a = spm_read(PMIC_WRAP_DVFS_WDATA5);
     temp_b = spm_read(PMIC_WRAP_DVFS_WDATA4);
@@ -1420,7 +1418,7 @@ wake_reason_t spm_go_to_sleep(u32 spm_flags, u32 spm_data)
     request_uart_to_wakeup();
 
     last_wr = spm_output_wake_reason(&wakesta, pcmdesc);
-    pmic_read_interface(0x0A08, &temp_c, 0xFFFF, 0);
+    pmic_read_interface_nolock(MT6328_VRF18_0_CON0, &temp_c, 0xFFFF, 0);
     spm_crit2("VRF18_0 = 0x%x\n", temp_c);
 
 #if defined(CONFIG_ARCH_MT6735)

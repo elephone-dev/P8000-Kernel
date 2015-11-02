@@ -319,6 +319,8 @@ struct ccci_smem_layout
 	unsigned int		ccci_exp_smem_ccci_debug_size;
 	void __iomem*		ccci_exp_smem_mdss_debug_vir;
 	unsigned int		ccci_exp_smem_mdss_debug_size;
+	void __iomem *ccci_exp_smem_sleep_debug_vir;
+	unsigned int ccci_exp_smem_sleep_debug_size;
 
 	// the address we parse MD exception record
 	void __iomem*		ccci_exp_rec_base_vir;
@@ -333,6 +335,8 @@ typedef enum {
 	DUMP_FLAG_LAYOUT = (1<<5),
 	DUMP_FLAG_DUMP_QUEUE_0 = (1<<6),
 	DUMP_FLAG_CCIF_REG = (1<<7),
+	DUMP_FLAG_SMEM_MDSLP = (1 << 9),
+	DUMP_FLAG_MD_WDT = (1 << 10),
 } MODEM_DUMP_FLAG;
 
 typedef enum {

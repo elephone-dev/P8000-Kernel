@@ -629,14 +629,12 @@ static void spm_sodi_pre_process(void)
     /* set PMIC WRAP table for deepidle power control */
     mt_cpufreq_set_pmic_phase(PMIC_WRAP_PHASE_DEEPIDLE);
 
-    vsram_vosel_on_lb = pmic_get_register_value(PMIC_VSRAM_VOSEL_ON_LB);
-    spm_write(SPM_PCM_RESERVE3,(pmic_get_register_value(PMIC_VSRAM_VOSEL_OFFSET)<<8)|pmic_get_register_value(PMIC_VSRAM_VOSEL_DELTA));//delta = 0v
-    pmic_set_register_value(PMIC_VSRAM_VOSEL_ON_LB,(vsram_vosel_on_lb&0xff80)|0x28);//0.85v
+    vsram_vosel_on_lb = __spm_dpidle_sodi_set_pmic_setting();
 }
 
 static void spm_sodi_post_process(void)
 {
-    pmic_set_register_value(PMIC_VSRAM_VOSEL_ON_LB,vsram_vosel_on_lb);
+    __spm_dpidle_sodi_restore_pmic_setting(vsram_vosel_on_lb);
 
     /* set PMIC WRAP table for normal power control */
     mt_cpufreq_set_pmic_phase(PMIC_WRAP_PHASE_NORMAL);

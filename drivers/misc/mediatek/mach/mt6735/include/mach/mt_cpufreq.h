@@ -158,6 +158,7 @@ CPUFREQ_EXTERN int  mt_cpufreq_set_lte_volt(int pmic_val);
 
 /* Thermal */
 CPUFREQ_EXTERN void mt_cpufreq_thermal_protect(unsigned int limited_power);
+CPUFREQ_EXTERN void mt_cpufreq_thermal_5A_limit(bool enable);
 
 /* PBM */
 CPUFREQ_EXTERN void mt_cpufreq_set_power_limit_by_pbm(unsigned int limited_power);

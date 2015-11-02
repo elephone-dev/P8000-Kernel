@@ -37,7 +37,7 @@
 #include <linux/hwmsen_dev.h>
 #include <linux/sensors_io.h>
 
-#define TPD_PROXIMITY
+//#define TPD_PROXIMITY
 
 #if defined(CONFIG_ENABLE_TOUCH_DRIVER_FOR_SELF_IC)
 
@@ -1667,7 +1667,7 @@ static s32 _DrvFwCtrlParsePacket(u8 *pPacket, u16 nLength, TouchInfo_t *pInfo)
         {
             pInfo->tPoint[0].nX = 0; // final X coordinate
             pInfo->tPoint[0].nY = 0; // final Y coordinate
-			printk("3333333333 line = %d  %d\n",__LINE__,tpd_proximity_flag);
+			//printk("3333333333 line = %d  %d\n",__LINE__,tpd_proximity_flag);
 			printk("pPacket[0]=%x pPacket[1]=%x pPacket[2]=%x pPacket[3]=%x pPacket[4]=%x pPacket[5]=%x pPacket[6]=%x pPacket[7]=%x \n",pPacket[0],pPacket[1],pPacket[2],pPacket[3],pPacket[4],pPacket[5],pPacket[6],pPacket[7]);
             if ((pPacket[5] != 0x00) && (pPacket[5] != 0xFF)) /* pPacket[5] is key value */
             {   /* 0x00 is key up, 0xff is touch screen up */

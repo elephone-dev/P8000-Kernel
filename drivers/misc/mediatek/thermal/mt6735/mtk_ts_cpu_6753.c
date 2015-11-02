@@ -26,6 +26,7 @@
 #include <mach/wd_api.h>
 #include <linux/mtk_gpu_utility.h>
 #include <linux/time.h>
+#include "mach/mt_cpufreq.h"
 
 #ifdef CONFIG_OF
 #include <linux/of.h>
@@ -145,7 +146,7 @@ static int g_prev_temp = 0;
 
 #if MTKTSCPU_FAST_POLLING
 // Combined fast_polling_trip_temp and fast_polling_factor, it means polling_delay will be 1/5 of original interval after mtktscpu reports > 65C w/o exit point
-static int fast_polling_trip_temp = 60000;
+static int fast_polling_trip_temp = 40000;
 static int fast_polling_factor = 2;
 static int cur_fp_factor = 1;
 static int next_fp_factor = 1;
@@ -153,6 +154,8 @@ static int next_fp_factor = 1;
 
 
 static int g_max_temp = 50000;//default=50 deg
+static int thermal5A_TH = 55000;
+static int thermal5A_status = 0;
 
 
 static unsigned int interval = 1000; /* mseconds, 0 : no auto polling */
@@ -403,7 +406,6 @@ do {                                    \
 
 static int mtktscpu_switch_bank(thermal_bank_name bank);
 static void tscpu_reset_thermal(void);
-extern void mt_cpufreq_thermal_protect(unsigned int limited_power);
 extern u32 get_devinfo_with_index(u32 index);
 extern void mt_gpufreq_thermal_protect(unsigned int limited_power);
 extern unsigned int mt_gpufreq_get_cur_freq(void);
@@ -954,8 +956,8 @@ static void thermal_config_Bank0_TS(void)
 	//tscpu_dprintk( "thermal_config_Bank0_TS:\n");
 
 //Bank0 : CPU     (TS_MCU2)
-//TSCON1[5:4]=2?™b00
-//TSCON1[2:0]=3?™b001
+//TSCON1[5:4]=2?b00
+//TSCON1[2:0]=3?b001
 
     THERMAL_WRAP_WR32(0x1,TEMPADCPNP0);                    // this value will be stored to TEMPPNPMUXADDR (TEMPSPARE0) automatically by hw
 
@@ -970,10 +972,10 @@ static void thermal_config_Bank1_TS(void)
 
 	//tscpu_dprintk( "thermal_config_Bank1_TS\n");
 //Bank1 : SOC+GPU (TS_MCU2, TS_MCU1)
-//TSCON1[5:4]=2?™b00
-//TSCON1[2:0]=3?™b001
-//TSCON1[5:4]=2?™b00
-//TSCON1[2:0]=3?™b000
+//TSCON1[5:4]=2?b00
+//TSCON1[2:0]=3?b001
+//TSCON1[5:4]=2?b00
+//TSCON1[2:0]=3?b000
 
     THERMAL_WRAP_WR32(0x1,TEMPADCPNP0);           // this value will be stored to TEMPPNPMUXADDR (TEMPSPARE0) automatically by hw
 	THERMAL_WRAP_WR32(0x0,TEMPADCPNP1);           // this value will be stored to TEMPPNPMUXADDR (TEMPSPARE1) automatically by hw
@@ -989,10 +991,10 @@ static void thermal_config_Bank2_TS(void)
 	//tscpu_dprintk( "thermal_config_Bank2_TS\n");
 
 //Bank2 : LTE     (TS_MCU2, TS_ABB)
-//TSCON1[5:4]=2?™b00
-//TSCON1[2:0]=3?™b001
-//TSCON1[5:4]=2?™b01
-//TSCON1[2:0]=3?™b000
+//TSCON1[5:4]=2?b00
+//TSCON1[2:0]=3?b001
+//TSCON1[5:4]=2?b01
+//TSCON1[2:0]=3?b000
 
 THERMAL_WRAP_WR32(0x1,TEMPADCPNP0);             // this value will be stored to TEMPPNPMUXADDR (TEMPSPARE0) automatically by hw
 	THERMAL_WRAP_WR32(0x10,TEMPADCPNP1);           // this value will be stored to TEMPPNPMUXADDR (TEMPSPARE1) automatically by hw
@@ -1777,7 +1779,13 @@ Bank2 : LTE     (TS_MCU2, TS_ABB)
 	/*for output signal monitor*/
 	tscpu_set_GPIO_toggle_for_monitor();
 #endif
-
+	if(curr_temp >= thermal5A_TH && thermal5A_status == 0) {
+		mt_cpufreq_thermal_5A_limit(1);
+		thermal5A_status = 1;
+	} else if(curr_temp < thermal5A_TH && thermal5A_status == 1) {
+		mt_cpufreq_thermal_5A_limit(0);
+		thermal5A_status = 0;
+	}
 	g_max_temp = curr_temp;
 
 	return ret;
@@ -4010,7 +4018,47 @@ static const struct file_operations mtktscpu_fops = {
     .release = single_release,
 };
 
+static int tzcpu_cpufreq5A_read(struct seq_file *m, void *v)
+{
+	int i;
 
+	seq_printf(m,"Thermal 5A threshold= %d\n",thermal5A_TH);
+	
+	return 0;
+}
+
+static ssize_t tzcpu_cpufreq5A_write(struct file *file, const char __user *buffer, size_t count, loff_t *data)
+{
+	char desc[32];
+	int th;
+	int len = 0;
+
+
+	len = (count < (sizeof(desc) - 1)) ? count : (sizeof(desc) - 1);
+	if (copy_from_user(desc, buffer, len))
+		return 0;
+	desc[len] = '\0';
+
+	if (sscanf(desc, "%d", &th) == 1){
+		thermal5A_TH = th;
+		return count;
+	}
+	
+	tscpu_printk(" bad argument\n");
+	return -EINVAL;
+}
+static int tzcpu_cpufreq5A_open(struct inode *inode, struct file *file)
+{
+    return single_open(file, tzcpu_cpufreq5A_read, NULL);
+}
+static const struct file_operations tzcpu_cpufreq5A_fops = {
+    .owner = THIS_MODULE,
+    .open = tzcpu_cpufreq5A_open,
+    .read = seq_read,
+    .llseek = seq_lseek,
+    .write = tzcpu_cpufreq5A_write,
+    .release = single_release,
+};
 
 static int tscpu_cal_open(struct inode *inode, struct file *file)
 {
@@ -4962,6 +5010,15 @@ static int __init tscpu_init(void)
 	else
 	{
 		entry = proc_create("tzcpu", S_IRUGO | S_IWUSR | S_IWGRP, mtktscpu_dir, &mtktscpu_fops);
+		if (entry) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
+            proc_set_user(entry, 0, 1000);
+#else
+            entry->gid = 1000;
+#endif
+		}
+		
+	entry = proc_create("tzcpu_cpufreq5A", S_IRUGO | S_IWUSR | S_IWGRP, mtktscpu_dir, &tzcpu_cpufreq5A_fops);
 		if (entry) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)
             proc_set_user(entry, 0, 1000);

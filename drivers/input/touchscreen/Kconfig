@@ -1016,6 +1016,12 @@ config TOUCHSCREEN_SYNAPTICS_S3528
 	help
 	  This enables support for Synaptics S3528 over I2C based touchscreens.
 	  
+config TOUCHSCREEN_SYNAPTICS_S2714
+	tristate "Synaptics S2714 touchscreen"
+	depends on I2C
+	help
+	  This enables support for Synaptics s2714 over I2C based touchscreens.
+	  
 config TOUCHSCREEN_SYNAPTICS
 	tristate "Synaptics touchscreen"
 	depends on I2C

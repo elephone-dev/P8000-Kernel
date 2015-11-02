@@ -573,9 +573,9 @@
 			interrupts = <0 128 0x2>;
 		};
 
-		CQDMA@0x10212c00 {
+		CQDMA@0x10217C00 {
 			compatible = "mediatek,CQDMA";
-			reg = <0x10212c00 0x1000>;
+			reg = <0x10217C00 0x1000>;
 			interrupts = <0 143 0x8>;
 			nr_channel = <1>;
                 };
